@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelManager : MonoBehaviour
+public class SceneSwapManager : MonoBehaviour
 {
-    public static LevelManager instance { get; private set; }
+    public static SceneSwapManager instance { get; private set; }
 
     private AsyncOperation _resourceUnloadTask;
     private AsyncOperation _sceneLoadTask;
@@ -13,10 +13,15 @@ public class LevelManager : MonoBehaviour
     private SceneState _sceneState;
     private delegate void UpdateDelegate();
     private UpdateDelegate[] _updateDelegates;
+    public delegate void SceneLoadHandler(Scene scene, LoadSceneMode lsm);
 
     public int PreviousScene { get; private set; }
     public int CurrScene { get; private set; }
     public int NextScene { get; private set; }
+
+#if UNITY_EDITOR
+    private string inputBuffer;
+#endif
 
     protected void Awake()
     {
@@ -48,6 +53,32 @@ public class LevelManager : MonoBehaviour
     {
         if (_updateDelegates[(int)_sceneState] != null)
             _updateDelegates[(int)_sceneState]();
+#if UNITY_EDITOR
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.N))
+        {
+            GoFoward();
+        }
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B))
+        {
+            GoBack();
+        }
+        if (Input.anyKeyDown)
+        {
+            inputBuffer += Input.inputString;
+        }
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R))
+        {
+            ReloadScene();
+        }
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            var aux = -1;
+            int.TryParse(inputBuffer, out aux);
+            inputBuffer = "";
+            aux = Mathf.Clamp(aux, 0, SceneManager.sceneCountInBuildSettings - 1);
+            ChangeScene(aux);
+        }
+#endif
     }
 
     public bool ChangeScene(int sceneIndex)
@@ -108,6 +139,10 @@ public class LevelManager : MonoBehaviour
     public void ReloadScene()
     {
         _sceneState = SceneState.Reset;
+    }
+    public void OnSceneLoad()
+    {
+
     }
     public string GetSceneName()
     {
