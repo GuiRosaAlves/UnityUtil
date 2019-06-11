@@ -11,13 +11,13 @@ public class MobileObject : MonoBehaviour
     public GameType gameType;
     private MovementHandler[] _behaviourList;
     public MovementHandler Move { get { return _behaviourList[(int)gameType]; } }
-    public Rigidbody2D rb2D { get; private set; }
+    public Rigidbody2D Rb2D { get; private set; }
     private Vector3 _dirModifier;
 
     private void Awake()
     {
         _dirModifier = new Vector3();
-        rb2D = GetComponent<Rigidbody2D>();
+        Rb2D = GetComponent<Rigidbody2D>();
 
         _behaviourList = new MovementHandler[3];
         _behaviourList[(int)GameType._3D] = Move3D;
